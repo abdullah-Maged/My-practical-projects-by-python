@@ -1,0 +1,235 @@
+number_of_visitor=input(" Please enter the number of adults visitors: ")
+visitor_rank=1
+while  number_of_visitor. isalpha() or number_of_visitor=="" :
+    print("Please enter only numbers ! ")
+    number_of_visitor=input(" Please enter the number of adults visitors: ")
+for i in range(int(number_of_visitor)):
+    print(f"Please enter the following data to each visitor \n {visitor_rank} ")
+    Name = input("Enter your full name: ")
+    while Name.isdigit() or Name=="" :
+        print("Please enter a word! ")
+        Name = input("Enter your full name: ")
+    Phone=input("Enter your phone number: ")
+    while Phone.isalpha()  or Phone=="" or len(Phone) !=11 :
+            print("Please enter only numbers with 11 digits ! ")
+            Phone = input("Enter your phone number: ")
+    Email=input("Please enter your email address: ")
+    Symbol="@"
+    while not Symbol in Email:
+        print("Please enter your email address with @ ! ")
+        Email=input("")
+    National=input(" Please enter your nationality: ")
+    while National.isdigit() or National=="" :
+        print("Please enter only country ! ")
+        National = input(" Please enter your nationality: ")
+    Id = input("Please enter your national or passport number(Id): ")
+    while Id.isalpha() or Id=="" :
+        print("Please enter only numbers ! ")
+        Id = input("Please enter your national or passport number(Id): ")
+    visitor_rank+=1
+rooms=["Single room","double room","Triple room","Family room","Royal suite"]
+print("Please choose the room that you want to book :\nSingle room\ndouble room\nTriple room\nFamily room\nRoyal suite")
+choice = input()
+while choice.isdigit() or choice=="" :
+    print("Please enter only words ! ")
+    choice = input("Please choose the room that you want to book: ")
+if choice==rooms[0]:
+    price_of_one_single_room=300
+    price_of_full_services=200
+    number=input("What number of that type of rooms do you want to book? ")
+    while number.isalpha() or number=="" :
+        print("Please enter only numbers ! ")
+        number=input()
+    night=input("What nights do you want to book? ")
+    while night.isalpha() or number=="" :
+        print("Please enter only numbers ! ")
+        night=input()
+    print(" Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+    service = input()
+    while service.isdigit() or service=="":
+        print("Please enter only words of two ! ")
+        print(
+            " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+        service = input()
+    if int(number) and service=="Full service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money)>(price_of_one_single_room+price_of_full_services)*int(number)*int(night):
+            print("The money you entered =",money,"$","\n","The amount due = ",float(money)-(price_of_one_single_room+price_of_full_services)*int(number)*int(night),"$","\n","the price of single room per night with full service =",price_of_one_single_room+price_of_full_services*int(number)*int(night) )
+        elif float(money)==(price_of_one_single_room+price_of_full_services)*int(number)*int(night):
+            print("Successful transaction !")
+    elif int(number) and service=="Not service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > price_of_one_single_room * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) -  price_of_one_single_room   * int(number)*int(night), "$","\n","the price of single room per night without any service = ", price_of_one_single_room )
+        elif float(money) ==  price_of_one_single_room  * int(number)*int(night):
+            print("Successful transaction !")
+            print("wish you spending good time ! ")
+elif choice==rooms[1]:
+    price_of_double_room =700
+    price_of_full_services = 400
+    number = input("What number of that type of rooms do you want to book? ")
+    while number.isalpha() or number == "":
+        print("Please enter only numbers ! ")
+        number = input()
+    night=input("What nights do you want to book? ")
+    while night.isalpha() or number=="":
+        print("Please enter only numbers ! ")
+        night = input()
+    print(
+        " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+    service = input()
+    while service.isdigit() or service == "":
+        print("Please enter only words of two ! ")
+        print(
+            " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+        service = input()
+    if int(number) and service=="Full service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > (price_of_double_room + price_of_full_services) * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - (price_of_double_room + price_of_full_services) * int(number)*int(night), "$","\n","The price per night of a room with full service =",price_of_double_room + price_of_full_services,)
+        elif float(money) == (price_of_double_room + price_of_full_services)*int(number)*int(night):
+            print("Successful transaction !")
+    elif int(number) and service=="Not service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > price_of_double_room * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - price_of_double_room  * int(number)*int(night), "$","\n","the price of double per night room without any service = ",price_of_double_room)
+        elif float(money) == price_of_double_room * int(number)*int(night):
+            print("Successful transaction !")
+            print("wish you spending good time ! ")
+elif choice==rooms[2]:
+    price_of_triple_room =1000
+    price_of_full_services = 600
+    number = input("What number of that type of rooms do you want to book? ")
+    while number.isalpha() or number == "":
+        print("Please enter only numbers ! ")
+        number = input()
+    night = input("What nights do you want to book? ")
+    while night.isalpha() or number == "":
+        print("Please enter only numbers ! ")
+        night = input()
+    print(
+        " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+    service = input()
+    while service.isdigit() or service == "":
+        print("Please enter only words of two ! ")
+        print(
+            " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+        service = input()
+    if int(number) and service=="Full service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > (price_of_triple_room  + price_of_full_services) * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - (price_of_triple_room  + price_of_full_services) * int(number)*int(night), "$","\n","The price per night of a room with full service =",price_of_triple_room  + price_of_full_services,)
+        elif float(money) == (price_of_triple_room  + price_of_full_services)*int(number)*int(night):
+            print("Successful transaction !")
+    elif int(number) and service=="Not service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > price_of_triple_room  * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - price_of_triple_room   * int(number)*int(night), "$","\n","the price of double per night room without any service = ",price_of_triple_room )
+        elif float(money) == price_of_triple_room  * int(number)*int(night):
+            print("Successful transaction !")
+            print("wish you spending good time ! ")
+elif choice==rooms[3]:
+    price_of_royal_room = 10000
+    price_of_full_services = 3000
+    number = input("What number of that type of rooms do you want to book? ")
+    while number.isalpha() or number == "":
+        print("Please enter only numbers ! ")
+        number = input()
+    night = input("What nights do you want to book? ")
+    while night.isalpha() or number == "":
+        print("Please enter only numbers ! ")
+        night = input()
+    print(
+        " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+    service = input()
+    while service.isdigit() or service == "":
+        print("Please enter only words of two ! ")
+        print(
+            " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+        service = input()
+    if int(number) and service=="Full service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > (price_of_royal_room  + price_of_full_services) * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - (price_of_royal_room  + price_of_full_services) * int(number)*int(night), "$","\n","The price per night of a suite with full service =",price_of_royal_room  + price_of_full_services,)
+        elif float(money) == (price_of_royal_room  + price_of_full_services)*int(number)*int(night):
+            print("Successful transaction !")
+    elif int(number) and service=="Not service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > price_of_royal_room  * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - price_of_royal_room   * int(number)*int(night), "$","\n","the price of royal suit per night without any service = ",price_of_royal_room )
+        elif float(money) == price_of_royal_room  * int(number)*int(night):
+            print("Successful transaction !")
+            print("wish you spending good time ! ")
+elif choice==rooms[3]:
+    price_of_family_room = 4000
+    price_of_full_services = 1000
+    number = input("What number of that type of rooms do you want to book? ")
+    while number.isalpha() or number == "":
+        print("Please enter only numbers ! ")
+        number = input()
+    night = input("What nights do you want to book? ")
+    while night.isalpha() or number == "":
+        print("Please enter only numbers ! ")
+        night = input()
+    print(
+        " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+    service = input()
+    while service.isdigit() or service == "":
+        print("Please enter only words of two ! ")
+        print(
+            " Do you want?\nFull service including open meals,air conditioning rooms,all room services\nnot service including limited meals,non air conditioning room ")
+        service = input()
+    if int(number) and service=="Full service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > (price_of_family_room  + price_of_full_services) * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - (price_of_family_room  + price_of_full_services) * int(number)*int(night), "$","\n","The price per night of a royal suite with full service =",price_of_family_room  + price_of_full_services,)
+        elif float(money) == (price_of_family_room  + price_of_full_services)*int(number)*int(night):
+            print("Successful transaction !")
+    elif int(number) and service=="Not service":
+        money=input("Enter the amount of money to book: ")
+        while money.isalpha() or money=="" :
+            print("Please enter only numbers ! ")
+            money = input()
+        if float(money) > price_of_family_room  * int(number)*int(night):
+            print("The money you entered =", money, "$", "\n", "The amount due = ",
+                  float(money) - price_of_family_room   * int(number)*int(night), "$","\n","the price of royal suite per night without any service = ",price_of_family_room )
+        elif float(money) == price_of_family_room  * int(number)*int(night):
+            print("Successful transaction !")
+            print("wish you spending good time ! ")
+else:
+    print("Thank you for visiting our website ! ")
