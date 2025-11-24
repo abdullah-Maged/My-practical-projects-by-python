@@ -1,0 +1,4 @@
+# Hotel Booking System (Python)
+
+This is a console-based hotel booking system made as a student project.
+It collects visitor info, validates inputs, allows room selection, and calculates costs.
