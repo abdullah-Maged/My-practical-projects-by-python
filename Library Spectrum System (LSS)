@@ -1,0 +1,503 @@
+from tkinter import *
+from tkinter import messagebox
+
+# ================= MAIN WINDOW =================
+window = Tk()
+window.title("Library Management System")
+window.geometry("950x650")
+window.config(bg="light gray")
+
+# ================= GLOBAL DATA STORAGE =================
+books = []          # list of dicts: id, title, author, publisher, price, year, category
+borrowed_books = [] # list of dicts: id, book_title, author, publisher, borrower_name,
+                    # borrow_date, return_date, borrowing_period, overdue_days, late_fee_per_day
+
+# ================= FRAMES / SCREENS =================
+main_frame = Frame(window, bg="light gray")
+book_frame = Frame(window, bg="light gray")
+add_book_frame = Frame(window, bg="light gray")
+edit_book_id_frame = Frame(window, bg="light gray")
+borrowed_frame = Frame(window, bg="light gray")
+add_borrowed_frame = Frame(window, bg="light gray")
+edit_period_frame = Frame(window, bg="light gray")
+compute_fees_frame = Frame(window, bg="light gray")
+
+# Place all frames
+main_frame.place(x=0, y=0, width=950, height=650)
+book_frame.place(x=0, y=0, width=950, height=650)
+add_book_frame.place(x=0, y=0, width=950, height=650)
+edit_book_id_frame.place(x=0, y=0, width=950, height=650)
+borrowed_frame.place(x=0, y=0, width=950, height=650)
+add_borrowed_frame.place(x=0, y=0, width=950, height=650)
+edit_period_frame.place(x=0, y=0, width=950, height=650)
+compute_fees_frame.place(x=0, y=0, width=950, height=650)
+
+# ================= SCREEN RAISING FUNCTIONS =================
+def show_main():
+    main_frame.tkraise()
+
+def show_book():
+    book_frame.tkraise()
+
+def show_add_book():
+    add_book_frame.tkraise()
+
+def show_edit_book_id():
+    edit_book_id_frame.tkraise()
+
+def show_borrowed():
+    borrowed_frame.tkraise()
+
+def show_add_borrowed():
+    add_borrowed_frame.tkraise()
+
+def show_edit_period():
+    edit_period_frame.tkraise()
+
+def show_compute_fees():
+    compute_fees_frame.tkraise()
+
+# ================= HELPER FUNCTIONS =================
+def refresh_book_display():
+    """Update the book text area with current book list"""
+    book_text.delete(1.0, END)
+    if not books:
+        book_text.insert(END, "No books in the library.\n")
+        return
+    display = "=" * 80 + "\n"
+    display += f"{'ID':<5} {'Title':<25} {'Author':<20} {'Publisher':<20}\n"
+    display += "=" * 80 + "\n"
+    for b in books:  # loop is allowed for data processing, not for widget creation
+        display += f"{b['id']:<5} {b['title']:<25} {b['author']:<20} {b['publisher']:<20}\n"
+        display += f"   Price: ${b['price']:.2f} | Year: {b['year']} | Category: {b['category']}\n"
+    display += "=" * 80
+    book_text.insert(END, display)
+
+def refresh_borrowed_display():
+    """Update the borrowed book text area with current borrowed list"""
+    borrowed_text.delete(1.0, END)
+    if not borrowed_books:
+        borrowed_text.insert(END, "No borrowed book records.\n")
+        return
+    display = "=" * 100 + "\n"
+    display += f"{'ID':<4} {'Borrower':<15} {'Book Title':<25} {'Author':<15} {'Period':<8} {'Overdue':<8} {'Fee/Day':<10}\n"
+    display += "=" * 100 + "\n"
+    for b in borrowed_books:  # loop for data display, allowed
+        display += f"{b['id']:<4} {b['borrower_name']:<15} {b['book_title']:<25} {b['author']:<15} "
+        display += f"{b['borrowing_period']:<8} {b['overdue_days']:<8} ${b['late_fee_per_day']:<9.2f}\n"
+        display += f"   Borrow: {b['borrow_date']} | Return: {b['return_date']} | Publisher: {b['publisher']}\n"
+    display += "=" * 100
+    borrowed_text.insert(END, display)
+
+# ================= BOOK SUBSYSTEM FUNCTIONS =================
+def add_book():
+    title = entry_book_title.get()
+    author = entry_book_author.get()
+    publisher = entry_book_publisher.get()
+    price_str = entry_book_price.get()
+    year_str = entry_book_year.get()
+    category = entry_book_category.get()
+
+    if not title or not author:
+        messagebox.showerror("Error", "Book Title and Author are required!")
+        return
+
+    try:
+        price = float(price_str) if price_str else 0.0
+    except:
+        messagebox.showerror("Error", "Price must be a number!")
+        return
+
+    try:
+        year = int(year_str) if year_str else 0
+    except:
+        messagebox.showerror("Error", "Year must be a number!")
+        return
+
+    # Generate new ID
+    new_id = 1
+    if books:
+        new_id = max(b['id'] for b in books) + 1
+
+    book = {
+        "id": new_id,
+        "title": title,
+        "author": author,
+        "publisher": publisher,
+        "price": price,
+        "year": year,
+        "category": category
+    }
+    books.append(book)
+    messagebox.showinfo("Success", f"Book '{title}' added with ID: {new_id}")
+    clear_add_book_entries()
+    refresh_book_display()
+    show_book()
+
+def clear_add_book_entries():
+    entry_book_title.delete(0, END)
+    entry_book_author.delete(0, END)
+    entry_book_publisher.delete(0, END)
+    entry_book_price.delete(0, END)
+    entry_book_year.delete(0, END)
+    entry_book_category.delete(0, END)
+
+def edit_book_id():
+    curr_id_str = entry_curr_id.get()
+    new_id_str = entry_new_id.get()
+    if not curr_id_str or not new_id_str:
+        messagebox.showerror("Error", "Both Current ID and New ID are required!")
+        return
+    try:
+        curr_id = int(curr_id_str)
+        new_id = int(new_id_str)
+    except:
+        messagebox.showerror("Error", "IDs must be numbers!")
+        return
+
+    # Find book
+    book_to_edit = None
+    for b in books:
+        if b['id'] == curr_id:
+            book_to_edit = b
+            break
+    if not book_to_edit:
+        messagebox.showerror("Error", f"No book found with ID: {curr_id}")
+        return
+    if any(b['id'] == new_id for b in books):
+        messagebox.showerror("Error", f"ID {new_id} already exists!")
+        return
+
+    book_to_edit['id'] = new_id
+    messagebox.showinfo("Success", f"Book ID changed from {curr_id} to {new_id}")
+    clear_edit_id_entries()
+    refresh_book_display()
+    show_book()
+
+def clear_edit_id_entries():
+    entry_curr_id.delete(0, END)
+    entry_new_id.delete(0, END)
+
+def display_books():
+    refresh_book_display()
+
+# ================= BORROWED BOOK SUBSYSTEM FUNCTIONS =================
+def add_borrowed_book():
+    title = entry_borrowed_title.get()
+    author = entry_borrowed_author.get()
+    publisher = entry_borrowed_publisher.get()
+    borrower = entry_borrower_name.get()
+    borrow_date = entry_borrow_date.get()
+    return_date = entry_return_date.get()
+    period_str = entry_borrowing_period.get()
+    overdue_str = entry_overdue_days.get()
+    fee_str = entry_late_fee.get()
+
+    if not title or not author or not borrower:
+        messagebox.showerror("Error", "Book Title, Author, and Borrower Name are required!")
+        return
+
+    try:
+        period = int(period_str) if period_str else 0
+        overdue = int(overdue_str) if overdue_str else 0
+        fee = float(fee_str) if fee_str else 0.0
+    except:
+        messagebox.showerror("Error", "Period, Overdue Days must be integers, Late Fee must be a number!")
+        return
+
+    new_id = 1
+    if borrowed_books:
+        new_id = max(b['id'] for b in borrowed_books) + 1
+
+    borrowed = {
+        "id": new_id,
+        "book_title": title,
+        "author": author,
+        "publisher": publisher,
+        "borrower_name": borrower,
+        "borrow_date": borrow_date,
+        "return_date": return_date,
+        "borrowing_period": period,
+        "overdue_days": overdue,
+        "late_fee_per_day": fee
+    }
+    borrowed_books.append(borrowed)
+    messagebox.showinfo("Success", f"Borrowed record added with ID: {new_id}")
+    clear_add_borrowed_entries()
+    refresh_borrowed_display()
+    show_borrowed()
+
+def clear_add_borrowed_entries():
+    entry_borrowed_title.delete(0, END)
+    entry_borrowed_author.delete(0, END)
+    entry_borrowed_publisher.delete(0, END)
+    entry_borrower_name.delete(0, END)
+    entry_borrow_date.delete(0, END)
+    entry_return_date.delete(0, END)
+    entry_borrowing_period.delete(0, END)
+    entry_overdue_days.delete(0, END)
+    entry_late_fee.delete(0, END)
+
+def display_borrowed_books():
+    refresh_borrowed_display()
+
+def edit_borrowing_period():
+    borrower = entry_edit_borrower.get()
+    title = entry_edit_title.get()
+    new_period_str = entry_new_period.get()
+    if not borrower or not title or not new_period_str:
+        messagebox.showerror("Error", "Borrower Name, Book Title, and New Period are required!")
+        return
+    try:
+        new_period = int(new_period_str)
+    except:
+        messagebox.showerror("Error", "Period must be a number!")
+        return
+
+    found = False
+    for b in borrowed_books:
+        if b['borrower_name'].lower() == borrower.lower() and b['book_title'].lower() == title.lower():
+            b['borrowing_period'] = new_period
+            found = True
+            break
+    if not found:
+        messagebox.showerror("Error", f"No borrowed record found for '{borrower}' and book '{title}'")
+        return
+    messagebox.showinfo("Success", f"Borrowing period updated to {new_period} days")
+    clear_edit_period_entries()
+    refresh_borrowed_display()
+    show_borrowed()
+
+def clear_edit_period_entries():
+    entry_edit_borrower.delete(0, END)
+    entry_edit_title.delete(0, END)
+    entry_new_period.delete(0, END)
+
+def check_borrower_details():
+    borrower = entry_check_borrower.get()
+    if not borrower:
+        messagebox.showerror("Error", "Please enter a borrower name")
+        return
+    # Find all borrowed records for this borrower
+    records = [b for b in borrowed_books if b['borrower_name'].lower() == borrower.lower()]
+    if not records:
+        borrowed_text.delete(1.0, END)
+        borrowed_text.insert(END, f"No borrowing records found for borrower: {borrower}\n")
+        return
+
+    display = "=" * 80 + "\n"
+    display += f"BORROWER DETAILS: {borrower}\n"
+    display += "=" * 80 + "\n\n"
+    for rec in records:
+        display += f"--- Borrowed Book Record (ID: {rec['id']}) ---\n"
+        display += f"Book Title: {rec['book_title']}\n"
+        display += f"Author: {rec['author']}\n"
+        display += f"Publisher: {rec['publisher']}\n"
+        display += f"Borrow Date: {rec['borrow_date']}\n"
+        display += f"Return Date: {rec['return_date']}\n"
+        display += f"Borrowing Period: {rec['borrowing_period']} days\n"
+        display += f"Overdue Days: {rec['overdue_days']}\n"
+        display += f"Late Fee Per Day: ${rec['late_fee_per_day']:.2f}\n"
+        book_info = [bk for bk in books if bk['title'].lower() == rec['book_title'].lower()
+                     and bk['author'].lower() == rec['author'].lower()]
+        if book_info:
+            bk = book_info[0]
+            display += f"Additional Info: Price=${bk['price']:.2f}, Year={bk['year']}, Category={bk['category']}\n"
+        display += "-" * 40 + "\n"
+    borrowed_text.delete(1.0, END)
+    borrowed_text.insert(END, display)
+
+def compute_late_fees():
+    overdue_str = entry_fee_overdue.get()
+    fee_str = entry_fee_per_day.get()
+    if not overdue_str or not fee_str:
+        messagebox.showerror("Error", "Please enter Overdue Days and Late Fee Per Day")
+        return
+    try:
+        overdue = int(overdue_str)
+        fee = float(fee_str)
+    except:
+        messagebox.showerror("Error", "Overdue Days must be integer, Late Fee must be number")
+        return
+    total = overdue * fee
+    result_text = f"Overdue Days: {overdue}\nLate Fee Per Day: ${fee:.2f}\n\nTotal Late Fees: ${total:.2f}\n"
+    fees_display_text.delete(1.0, END)
+    fees_display_text.insert(END, result_text)
+
+def clear_fee_entries():
+    entry_fee_overdue.delete(0, END)
+    entry_fee_per_day.delete(0, END)
+    fees_display_text.delete(1.0, END)
+
+# ================= MAIN MENU SCREEN =================
+Label(main_frame, text="LIBRARY MANAGEMENT SYSTEM", font=("Arial", 26, "bold"), bg="light gray", fg="dark blue")\
+    .place(x=475, y=100, anchor="center")
+
+Button(main_frame, text="Book Sub-system", width=30, height=2, command=show_book).place(x=475, y=220, anchor="center")
+Button(main_frame, text="Borrowed Book Sub-system", width=30, height=2, command=show_borrowed).place(x=475, y=300, anchor="center")
+Button(main_frame, text="Exit System", width=20, height=2, command=window.destroy, bg="red", fg="white")\
+    .place(x=475, y=400, anchor="center")
+
+# ================= BOOK SUBSYSTEM SCREEN =================
+Label(book_frame, text="Book Sub-system", font=("Arial", 22, "bold"), bg="light gray").place(x=475, y=30, anchor="center")
+
+Button(book_frame, text="Add New Book", width=25, height=2, command=show_add_book).place(x=200, y=100)
+Button(book_frame, text="Display Book Details", width=25, height=2, command=display_books).place(x=200, y=160)
+Button(book_frame, text="Edit Book ID", width=25, height=2, command=show_edit_book_id).place(x=200, y=220)
+Button(book_frame, text="Back to Main Menu", width=25, height=2, command=show_main).place(x=200, y=300)
+Button(book_frame, text="Exit", width=25, height=2, command=window.destroy, bg="red", fg="white").place(x=200, y=360)
+
+book_text = Text(book_frame, width=70, height=22, wrap=WORD, font=("Courier", 9))
+book_text.place(x=420, y=80, width=500, height=500)
+
+# ================= ADD BOOK SCREEN =================
+Label(add_book_frame, text="Add New Book", font=("Arial", 20, "bold"), bg="light gray").place(x=475, y=20, anchor="center")
+
+# Widgets created one by one (no loops)
+Label(add_book_frame, text="Book Title:", bg="light gray", font=("Arial", 11)).place(x=270, y=80)
+entry_book_title = Entry(add_book_frame, width=35, font=("Arial", 11))
+entry_book_title.place(x=420, y=80)
+
+Label(add_book_frame, text="Author Name:", bg="light gray", font=("Arial", 11)).place(x=270, y=125)
+entry_book_author = Entry(add_book_frame, width=35, font=("Arial", 11))
+entry_book_author.place(x=420, y=125)
+
+Label(add_book_frame, text="Publisher:", bg="light gray", font=("Arial", 11)).place(x=270, y=170)
+entry_book_publisher = Entry(add_book_frame, width=35, font=("Arial", 11))
+entry_book_publisher.place(x=420, y=170)
+
+Label(add_book_frame, text="Price:", bg="light gray", font=("Arial", 11)).place(x=270, y=215)
+entry_book_price = Entry(add_book_frame, width=35, font=("Arial", 11))
+entry_book_price.place(x=420, y=215)
+
+Label(add_book_frame, text="Year of Publication:", bg="light gray", font=("Arial", 11)).place(x=270, y=260)
+entry_book_year = Entry(add_book_frame, width=35, font=("Arial", 11))
+entry_book_year.place(x=420, y=260)
+
+Label(add_book_frame, text="Category:", bg="light gray", font=("Arial", 11)).place(x=270, y=305)
+entry_book_category = Entry(add_book_frame, width=35, font=("Arial", 11))
+entry_book_category.place(x=420, y=305)
+
+Button(add_book_frame, text="Submit", width=15, command=add_book).place(x=330, y=380)
+Button(add_book_frame, text="Clear", width=15, command=clear_add_book_entries).place(x=440, y=380)
+Button(add_book_frame, text="Back", width=15, command=show_book).place(x=550, y=380)
+
+# ================= EDIT BOOK ID SCREEN =================
+Label(edit_book_id_frame, text="Edit Book ID", font=("Arial", 20, "bold"), bg="light gray").place(x=475, y=40, anchor="center")
+
+Label(edit_book_id_frame, text="Current Book ID:", bg="light gray", font=("Arial", 12)).place(x=300, y=120)
+entry_curr_id = Entry(edit_book_id_frame, width=25, font=("Arial", 12))
+entry_curr_id.place(x=480, y=120)
+
+Label(edit_book_id_frame, text="New Book ID:", bg="light gray", font=("Arial", 12)).place(x=300, y=180)
+entry_new_id = Entry(edit_book_id_frame, width=25, font=("Arial", 12))
+entry_new_id.place(x=480, y=180)
+
+Button(edit_book_id_frame, text="Submit", width=15, command=edit_book_id).place(x=380, y=260)
+Button(edit_book_id_frame, text="Clear", width=15, command=clear_edit_id_entries).place(x=480, y=260)
+Button(edit_book_id_frame, text="Back", width=15, command=show_book).place(x=580, y=260)
+
+# ================= BORROWED BOOK SUBSYSTEM SCREEN =================
+Label(borrowed_frame, text="Borrowed Book Sub-system", font=("Arial", 22, "bold"), bg="light gray").place(x=475, y=20, anchor="center")
+
+Button(borrowed_frame, text="Add New Borrowed Book", width=25, height=2, command=show_add_borrowed).place(x=180, y=80)
+Button(borrowed_frame, text="Display Borrowed Book Details", width=25, height=2, command=display_borrowed_books).place(x=180, y=140)
+Button(borrowed_frame, text="Edit Borrowing Period", width=25, height=2, command=show_edit_period).place(x=180, y=200)
+
+# Check borrower section
+Label(borrowed_frame, text="Borrower Name:", bg="light gray", font=("Arial", 10)).place(x=180, y=275)
+entry_check_borrower = Entry(borrowed_frame, width=25)
+entry_check_borrower.place(x=180, y=300)
+Button(borrowed_frame, text="Check Borrower & Book Details", width=25, command=check_borrower_details).place(x=180, y=335)
+
+Button(borrowed_frame, text="Compute Late Fees", width=25, height=2, command=show_compute_fees).place(x=180, y=400)
+Button(borrowed_frame, text="Back to Main Menu", width=25, height=2, command=show_main).place(x=180, y=460)
+Button(borrowed_frame, text="Exit", width=25, height=2, command=window.destroy, bg="red", fg="white").place(x=180, y=520)
+
+borrowed_text = Text(borrowed_frame, width=70, height=28, wrap=WORD, font=("Courier", 9))
+borrowed_text.place(x=440, y=70, width=490, height=530)
+
+# ================= ADD BORROWED BOOK SCREEN =================
+Label(add_borrowed_frame, text="Add Borrowed Book Record", font=("Arial", 20, "bold"), bg="light gray").place(x=475, y=15, anchor="center")
+
+# Widgets created manually without loops
+Label(add_borrowed_frame, text="Book Title:", bg="light gray", font=("Arial", 10)).place(x=200, y=60)
+entry_borrowed_title = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_borrowed_title.place(x=400, y=60)
+
+Label(add_borrowed_frame, text="Author Name:", bg="light gray", font=("Arial", 10)).place(x=200, y=92)
+entry_borrowed_author = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_borrowed_author.place(x=400, y=92)
+
+Label(add_borrowed_frame, text="Publisher:", bg="light gray", font=("Arial", 10)).place(x=200, y=124)
+entry_borrowed_publisher = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_borrowed_publisher.place(x=400, y=124)
+
+Label(add_borrowed_frame, text="Borrower Name:", bg="light gray", font=("Arial", 10)).place(x=200, y=156)
+entry_borrower_name = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_borrower_name.place(x=400, y=156)
+
+Label(add_borrowed_frame, text="Borrow Date:", bg="light gray", font=("Arial", 10)).place(x=200, y=188)
+entry_borrow_date = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_borrow_date.place(x=400, y=188)
+
+Label(add_borrowed_frame, text="Return Date:", bg="light gray", font=("Arial", 10)).place(x=200, y=220)
+entry_return_date = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_return_date.place(x=400, y=220)
+
+Label(add_borrowed_frame, text="Borrowing Period (days):", bg="light gray", font=("Arial", 10)).place(x=200, y=252)
+entry_borrowing_period = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_borrowing_period.place(x=400, y=252)
+
+Label(add_borrowed_frame, text="Overdue Days:", bg="light gray", font=("Arial", 10)).place(x=200, y=284)
+entry_overdue_days = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_overdue_days.place(x=400, y=284)
+
+Label(add_borrowed_frame, text="Late Fee Per Day ($):", bg="light gray", font=("Arial", 10)).place(x=200, y=316)
+entry_late_fee = Entry(add_borrowed_frame, width=30, font=("Arial", 10))
+entry_late_fee.place(x=400, y=316)
+
+Button(add_borrowed_frame, text="Submit", width=15, command=add_borrowed_book).place(x=340, y=380)
+Button(add_borrowed_frame, text="Clear", width=15, command=clear_add_borrowed_entries).place(x=440, y=380)
+Button(add_borrowed_frame, text="Back", width=15, command=show_borrowed).place(x=540, y=380)
+
+# ================= EDIT BORROWING PERIOD SCREEN =================
+Label(edit_period_frame, text="Edit Borrowing Period", font=("Arial", 20, "bold"), bg="light gray").place(x=475, y=40, anchor="center")
+
+Label(edit_period_frame, text="Borrower Name:", bg="light gray", font=("Arial", 12)).place(x=280, y=120)
+entry_edit_borrower = Entry(edit_period_frame, width=25, font=("Arial", 12))
+entry_edit_borrower.place(x=450, y=120)
+
+Label(edit_period_frame, text="Book Title:", bg="light gray", font=("Arial", 12)).place(x=280, y=180)
+entry_edit_title = Entry(edit_period_frame, width=25, font=("Arial", 12))
+entry_edit_title.place(x=450, y=180)
+
+Label(edit_period_frame, text="New Borrowing Period (days):", bg="light gray", font=("Arial", 12)).place(x=230, y=240)
+entry_new_period = Entry(edit_period_frame, width=25, font=("Arial", 12))
+entry_new_period.place(x=450, y=240)
+
+Button(edit_period_frame, text="Submit", width=15, command=edit_borrowing_period).place(x=380, y=320)
+Button(edit_period_frame, text="Clear", width=15, command=clear_edit_period_entries).place(x=480, y=320)
+Button(edit_period_frame, text="Back", width=15, command=show_borrowed).place(x=580, y=320)
+
+# ================= COMPUTE LATE FEES SCREEN =================
+Label(compute_fees_frame, text="Compute Late Fees", font=("Arial", 20, "bold"), bg="light gray").place(x=475, y=40, anchor="center")
+
+Label(compute_fees_frame, text="Overdue Days:", bg="light gray", font=("Arial", 12)).place(x=300, y=120)
+entry_fee_overdue = Entry(compute_fees_frame, width=25, font=("Arial", 12))
+entry_fee_overdue.place(x=460, y=120)
+
+Label(compute_fees_frame, text="Late Fee Per Day ($):", bg="light gray", font=("Arial", 12)).place(x=300, y=180)
+entry_fee_per_day = Entry(compute_fees_frame, width=25, font=("Arial", 12))
+entry_fee_per_day.place(x=460, y=180)
+
+Button(compute_fees_frame, text="Compute", width=15, command=compute_late_fees).place(x=360, y=250)
+Button(compute_fees_frame, text="Clear", width=15, command=clear_fee_entries).place(x=460, y=250)
+Button(compute_fees_frame, text="Back", width=15, command=show_borrowed).place(x=560, y=250)
+
+fees_display_text = Text(compute_fees_frame, width=50, height=8, font=("Courier", 12))
+fees_display_text.place(x=475, y=400, anchor="center")
+
+# ================= START PROGRAM =================
+show_main()
+window.mainloop()
