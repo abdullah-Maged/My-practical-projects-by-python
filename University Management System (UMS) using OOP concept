@@ -1,0 +1,284 @@
+import time
+
+class Person:
+    def __init__(self, name: str, phone: int, program: str, nid: int):
+        self.name = name
+        self._nid = nid  # protected variable
+        self.phone = phone
+        self.faculty = "Faculty of Commerce and Business Administration"
+        self.program = program
+        self.semester = "Second Semester"
+        self.year = "2026"
+
+    def display_account_details(self):
+        print(f"""
+        {"="*50}
+        |               ACCOUNT DETAILS                 |
+        {"="*50}
+        | Name:        {self.name}
+        | National ID: {self._nid}
+        | Phone:       {self.phone}
+        | Faculty:     {self.faculty}
+        | Program:     {self.program}
+        | Semester:    {self.semester}
+        | Year:        {self.year}
+        {"="*50}
+        """)
+
+class Doctor(Person):
+    def __init__(self, nid: int, name="", phone=None, program="", code="", course="", salary=0):
+        super().__init__(name, phone, program, nid)
+        self.code = code
+        self.course = course
+        self.salary = salary
+        self.hours_worked = 0
+
+    def display_doctor_details(self):
+        print(f"""
+        {"="*50}
+        |            DOCTOR ACCOUNT DETAILS             |
+        {"="*50}
+        | Name:        {self.name}
+        | Phone:       {self.phone}
+        | Code:        {self.code}
+        | National ID: {self._nid}
+        | Program:     {self.program}
+        | Year:        {self.year}
+        {"="*50}
+        """)
+
+    def check_course(self):
+        print(f"-> The courses you currently teach: {self.course}")
+
+    def add_course(self, new_course: str):
+        print(f"-> Course before update: {self.course}")
+        self.course = new_course
+        print(f"-> Course added successfully! New course: {self.course}")
+
+    def check_hours_worked(self):
+        print(f"-> Your worked hours: {self.hours_worked} hours")
+
+    def add_hours_worked(self, hours: int):
+        self.hours_worked = hours
+        print(f"-> Worked hours updated to: {self.hours_worked} hours")
+
+    def check_salary(self, base_salary: float):
+        self.salary = base_salary
+        if self.hours_worked > 30:
+            overtime_hours = self.hours_worked - 30
+            # حساب الأوفر تايم بناءً على قيمة الساعة من الراتب الأساسي مفترضين 30 ساعة أساسية
+            overtime_amount = overtime_hours * (self.salary / 30)
+            net_salary = self.salary + overtime_amount
+            print(f"-> Net base salary: {self.salary} EGP")
+            print(f"-> Salary after adding overtime ({overtime_hours} hrs): {net_salary:.2f} EGP")
+        else:
+            print(f"-> Your net salary is: {self.salary} EGP (No overtime)")
+
+class Student(Person):
+    def __init__(self, nid: int, name="", phone=None, program="", student_id=None, university_email=None):
+        super().__init__(name, phone, program, nid)
+        self.university_email = university_email
+        self.student_id = student_id
+
+    # Getter & Setter للتحكم في الـ National ID بأمان
+    @property
+    def nid(self):
+        return self._nid
+
+    @nid.setter
+    def nid(self, new_id: int):
+        if len(str(new_id)) >= 5:  # شرط بسيط كمثال للتحقق
+            self._nid = new_id
+            print("-> National ID updated successfully!")
+        else:
+            print("-> Invalid National ID format!")
+
+    def display_student_details(self):
+        print(f"""
+        {"="*50}
+        |            STUDENT ACCOUNT DETAILS            |
+        {"="*50}
+        | Name:             {self.name}
+        | Phone:            {self.phone}
+        | Program:          {self.program}
+        | Semester:         {self.semester}
+        | Student ID:       {self.student_id}
+        | University Email: {self.university_email}
+        | Year:             {self.year}
+        {"="*50}
+        """)
+
+
+def main():
+    student_account = None
+    doctor_account = None
+
+    while True:
+        print("\n=== University Management System ===")
+        role = input("Are you a student or a doctor? (type 'exit' to quit): ").strip().lower()
+
+        if role == 'exit':
+            print("Thank you for using our system. Goodbye!")
+            break
+
+        if role not in ["student", "doctor"]:
+            print("❌ Invalid role! Please type 'student', 'doctor', or 'exit'.")
+            continue
+
+        # سيستم الطالب
+        if role == "student":
+            while True:
+                print("""
+---------------------- Welcome to Student System ----------------------
+|  1. Account Creation
+|  2. View Student Account Details
+|  3. Check National ID
+|  4. Change National ID
+|  5. Logout to Main Menu
+------------------------------------------------------------------------""")
+                try:
+                    choice = int(input("Please enter your choice (1-5): "))
+                except ValueError:
+                    print("❌ Please enter a valid number between 1 and 5.")
+                    continue
+
+                if choice == 1:
+                    try:
+                        name = input("Enter your name: ")
+                        phone = int(input("Enter your phone: "))
+                        program = input("Enter your program: ")
+                        nid = int(input("Enter your national ID: "))
+                        email = input("Enter your university email: ")
+                        s_id = int(input("Enter your student ID: "))
+                    except ValueError:
+                        print("❌ Input Error: Phone, ID, and National ID must be numbers only!")
+                        time.sleep(2)
+                        continue
+                    
+                    student_account = Student(nid, name, phone, program, s_id, email)
+                    print("\n🎉 Account created successfully!")
+                    time.sleep(1)
+
+                elif choice == 2:
+                    if student_account:
+                        student_account.display_student_details()
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 3:
+                    if student_account:
+                        print(f"-> Your National ID is: {student_account.nid}")
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 4:
+                    if student_account:
+                        try:
+                            new_nid = int(input("Enter new National ID: "))
+                            student_account.nid = new_nid
+                        except ValueError:
+                            print("❌ Error: ID must be numbers only.")
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 5:
+                    print("Logging out from student system...")
+                    break
+
+        # سيستم الدكتور
+        elif role == "doctor":
+            while True:
+                print("""
+---------------------- Welcome to Doctor System ----------------------
+|  1. Account Creation
+|  2. View Doctor Account Details
+|  3. Check Course
+|  4. Update Course
+|  5. Add Worked Hours
+|  6. Check Worked Hours
+|  7. Check Salary & Overtime
+|  8. Logout to Main Menu
+------------------------------------------------------------------------""")
+                try:
+                    choice = int(input("Please enter your choice (1-8): "))
+                except ValueError:
+                    print("❌ Please enter a valid number between 1 and 8.")
+                    continue
+
+                if choice == 1:
+                    try:
+                        name = input("Enter your name: ")
+                        phone = int(input("Enter your phone: "))
+                        program = input("Enter your program: ")
+                        code = input("Enter your code: ")
+                        nid = int(input("Enter your national ID: "))
+                        course = input("Enter your course: ")
+                    except ValueError:
+                        print("❌ Input Error: Phone and National ID must be numbers only!")
+                        time.sleep(2)
+                        continue
+
+                    doctor_account = Doctor(nid, name, phone, program, code, course)
+                    print("\n🎉 Doctor account created successfully!")
+                    time.sleep(1)
+
+                elif choice == 2:
+                    if doctor_account:
+                        doctor_account.display_doctor_details()
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 3:
+                    if doctor_account:
+                        doctor_account.check_course()
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 4:
+                    if doctor_account:
+                        new_c = input("Enter the new course name: ")
+                        doctor_account.add_course(new_c)
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 5:
+                    if doctor_account:
+                        try:
+                            hrs = int(input("Enter worked hours: "))
+                            doctor_account.add_hours_worked(hrs)
+                        except ValueError:
+                            print("❌ Error: Hours must be a number.")
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 6:
+                    if doctor_account:
+                        doctor_account.check_hours_worked()
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 7:
+                    if doctor_account:
+                        try:
+                            base_sal = float(input("Enter your base salary: "))
+                            doctor_account.check_salary(base_sal)
+                        except ValueError:
+                            print("❌ Error: Salary must be a number.")
+                    else:
+                        print("❌ Error: You must create an account first!")
+                    time.sleep(2)
+
+                elif choice == 8:
+                    print("Logging out from doctor system...")
+                    break
+
+if __name__ == "__main__":
+    main()
